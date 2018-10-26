@@ -1,5 +1,4 @@
 from flask import Flask
-import os, os.path
 import sys
 import ast
 
@@ -7,6 +6,8 @@ from whoosh.fields import Schema, TEXT, KEYWORD, ID, STORED, DATETIME
 from whoosh.filedb.filestore import FileStorage
 from whoosh.writing import AsyncWriter
 from whoosh import index, qparser, query
+
+app = Flask(__name__)
 
 def index():
     companies = sys.argv[1]
@@ -48,7 +49,7 @@ def search(page, queryStr, field):
     qp.add_plugin(qparser.MultifieldPlugin(field))
     qp.add_plugin(qparser.FuzzyTermPlugin())
     q = qp.parse(unicode(queryStr, "utf-8"))
-    print q
+    # print q
 
     with ix.searcher() as s:
         results = s.search_page(q, page, pagelen=20)
@@ -61,11 +62,10 @@ if len(sys.argv) > 1:
 
 search(1, "San Fransico", ["city", "region"])
 
-# app = Flask(__name__)
-# @app.route('/')
-# def hello_world():
-#     return 'Hello World!'
+@app.route('/search')
+def searchWrapper(query):
+    search(1, query, ["city", "region"])
 
-# if __name__ == '__main__':
-  #app.run(host='0.0.0.0')
+if __name__ == '__main__':
+    app.run(host='0.0.0.0')
 #['permalink','name','homepage_url','category_list','funding_total_usd','status','country_code','state_code','region','city','funding_rounds']
